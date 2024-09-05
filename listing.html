@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Serial Data</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/datatables.min.css">
+    <script src="/static/jquery-3.7.1.min.js"></script>
+    <script src="/static/plotly-2.35.0.min.js"></script>
+    <script src="/static/datatables.min.js"></script>
+    <script>
+        var data = []
+        var table = null
+
+        function initTable() {
+            table = new DataTable('#myTable', {
+                data: data,
+                pageLength: 1000,
+                columns: [
+                    {title: "Timestamp", data: "timestamp"},
+                    {title: "Epoch", data: "epoch"},
+                    {title: "Message", data: "msg"}
+                ],
+                layout: {
+                    topStart: {
+                        buttons: ['copy', 'csv', 'excel']
+                    }
+                }
+            });
+        }
+
+        function setData(newData) {
+            data = newData
+            updatePlot(data)
+            updateTable(data)
+        }
+
+        function updateTable(data) {
+            table.clear();
+            table.rows.add(data).draw();
+        }
+
+        function updatePlot(data) {
+            Plotly.newPlot(
+                document.getElementById("tester"),
+                [{
+                    x: data.map((d) => d.timestamp),
+                    y: data.map((d) => parseInt(d.msg)),
+                    mode: 'markers',
+                    name: 'Scatter'
+                }]
+            )
+        }
+
+        function fetchData(start, end) {
+            return fetch("/list?start=" + start + "&end=" + end)
+                .then(response => response.json())
+                .then(data => setData(data))
+        }
+
+        function onFilterClick() {
+            const starttime = document.getElementById("starttime").value
+            const endtime = document.getElementById("endtime").value
+            fetchData(starttime, endtime)
+        }
+
+        $(document).ready(() => {
+            initTable();
+            fetchData("", "")
+        })
+        function clearInput(){
+            $('#starttime').val('');
+            $('#endtime').val('');
+        }
+    </script>
+</head>
+<body>
+<input type="datetime-local" id="starttime" name="starttime" >
+<input type="datetime-local" id="endtime" name="endtime">
+<button onclick="onFilterClick()">Filter</button>
+<button onclick="clearInput()">Clear</button>
+<div id="tester" style="margin-left: 0;margin-right:0;height:500px;"></div>
+<table id="myTable" class="display">
+</table>
+</body>
+</html>
