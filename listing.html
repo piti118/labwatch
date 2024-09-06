@@ -3,6 +3,7 @@
 <head>
     <title>Serial Data</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/ripple.css">
     <link rel="stylesheet" href="/static/datatables.min.css">
     <script src="/static/jquery-3.7.1.min.js"></script>
     <script src="/static/plotly-2.35.0.min.js"></script>
@@ -52,9 +53,11 @@
         }
 
         function fetchData(start, end) {
+            $(".lds-ripple").show()
             return fetch("/list?start=" + start + "&end=" + end)
                 .then(response => response.json())
                 .then(data => setData(data))
+                .finally(() => $(".lds-ripple").hide())
         }
 
         function onFilterClick() {
@@ -67,17 +70,24 @@
             initTable();
             fetchData("", "")
         })
-        function clearInput(){
+
+        function clearInput() {
             $('#starttime').val('');
             $('#endtime').val('');
         }
     </script>
 </head>
 <body>
-<input type="datetime-local" id="starttime" name="starttime" >
-<input type="datetime-local" id="endtime" name="endtime">
-<button onclick="onFilterClick()">Filter</button>
-<button onclick="clearInput()">Clear</button>
+<div>
+    <input type="datetime-local" id="starttime" name="starttime">
+    <input type="datetime-local" id="endtime" name="endtime">
+    <button onclick="onFilterClick()">Filter</button>
+    <button onclick="clearInput()">Clear</button>
+</div>
+<div class="lds-ripple" style="display: none">
+    <div></div>
+    <div></div>
+</div>
 <div id="tester" style="margin-left: 0;margin-right:0;height:500px;"></div>
 <table id="myTable" class="display">
 </table>

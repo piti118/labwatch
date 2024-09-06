@@ -74,6 +74,7 @@ func ReadSerial(ctx context.Context, address string, baudrate int, db *sql.DB) e
 		}
 	}()
 	serialStream := SerialStream(ctx, port)
+	logCounter := 0
 	for {
 		select {
 		case <-ctx.Done():
@@ -86,7 +87,10 @@ func ReadSerial(ctx context.Context, address string, baudrate int, db *sql.DB) e
 			if err != nil {
 				return err
 			}
-			log.Infof("ID: %d, Time: %s, Msg: %s\n", id, time.Now().Format("2006-01-02 15:04:05.000"), msg)
+			if logCounter%100 == 0 {
+				log.Infof("ID: %d, Time: %s, Msg: %s\n", id, time.Now().Format("2006-01-02 15:04:05.000"), msg)
+			}
+			logCounter++
 		}
 	}
 }
